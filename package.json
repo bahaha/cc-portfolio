@@ -1,0 +1,20 @@
+{
+  "name": "cc-portfolio",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "AWS_PROFILE=cc sst dev astro dev",
+    "start": "AWS_PROFILE=cc astro dev",
+    "build": "AWS_PROFILE=cc astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^4.5.12",
+    "@astrojs/check": "^0.5.10",
+    "typescript": "^5.4.3",
+    "sst": "^3.0.1",
+    "astro-sst": "^2.41.2"
+  }
+}
+
