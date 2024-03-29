@@ -1,9 +1,16 @@
 ---
 import Layout from "@/layouts/DefaultLayout.astro";
+import TexturedBlendingAstro from "@/components/textured-text-blending/index.astro";
 ---
 
 <Layout>
-    <h1 class="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl">
+    <h1
+        class="my-2 scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
+    >
         Texture Blending
     </h1>
+    <TexturedBlendingAstro
+        image="/public/olga-thelavart-5Xkaq7I1iEk.jpg"
+        text="Aloha"
+    />
 </Layout>
