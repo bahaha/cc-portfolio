@@ -1,9 +1,13 @@
 {
   "extends": "astro/tsconfigs/strict",
   "compilerOptions": {
-      "baseUrl": ".",
-      "paths": {
-          "@/*": ["./src/*"]
-      }
+    "baseUrl": "/Users/cheng/Documents/workspace/playground/cc-portfolio",
+    "paths": {
+      "@/*": [
+        "./src/*"
+      ]
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react"
   }
 }
