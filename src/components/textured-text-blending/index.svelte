@@ -1,16 +1,14 @@
----
-export type Props = {
-  image: string;
-  text: string;
-  color?: string;
-};
-
-const { image, text, color = "#000" } = Astro.props;
----
+<script lang="ts">
+  import type { StoreValue } from "nanostores";
+  import store from "./texture-store";
+  type Store = StoreValue<typeof store>;
+  const { text, color } = store as Store;
+  let { image } = $props();
+</script>
 
 <svg viewBox="0 0 640 480">
   <defs>
-    <filter id="blend">
+    <filter id="blend-svelte">
       <feImage
         href={image}
         x="0"
@@ -18,28 +16,32 @@ const { image, text, color = "#000" } = Astro.props;
         width="100%"
         height="100%"
         preserveAspectRatio="none"
-        result="Textured"></feImage>
+        result="Textured"
+      ></feImage>
       <!-- Grayscle -->
       <feColorMatrix
         in="Textured"
         type="saturate"
         values="0"
-        result="GrayscaleTextured"></feColorMatrix>
+        result="GrayscaleTextured"
+      ></feColorMatrix>
       <feDisplacementMap
         in="SourceGraphic"
         in2="GrayscaleTextured"
         scale="15"
         xChannelSelector="R"
         yChannelSelector="R"
-        result="TexturedText"></feDisplacementMap>
+        result="TexturedText"
+      ></feDisplacementMap>
       <feColorMatrix
         in="TexturedText"
         type="matrix"
         values="1 0 0 0 0
-                            0 1 0 0 0
-                            0 0 1 0 0
-                            0 0 0 0.9 0"
-        result="OpacityText"></feColorMatrix>
+                0 1 0 0 0
+                0 0 1 0 0
+                0 0 0 0.9 0"
+        result="OpacityText"
+      ></feColorMatrix>
       <feImage
         href={image}
         x="0"
@@ -47,7 +49,8 @@ const { image, text, color = "#000" } = Astro.props;
         width="100%"
         height="100%"
         preserveAspectRatio="none"
-        result="TexturedBackground"></feImage>
+        result="TexturedBackground"
+      ></feImage>
       <feBlend in="TexturedBackground" in2="OpacityText" mode="multiply"
       ></feBlend>
     </filter>
@@ -63,13 +66,13 @@ const { image, text, color = "#000" } = Astro.props;
   <text
     x="50%"
     y="68%"
-    font-size="10rem"
+    font-size="5rem"
     font-weight="bold"
     text-anchor="middle"
     alignment-baseline="middle"
-    fill={color}
-    filter="url(#blend)"
+    fill={$color}
+    filter="url(#blend-svelte)"
   >
-    {text}
+    {$text}
   </text>
 </svg>
