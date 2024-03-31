@@ -9,16 +9,16 @@ type TextureBackground = {
 
 export const textureBackgrounds: TextureBackground[] = [
   {
-    name: "Painting Wall",
-    src: "/olga-thelavart-5Xkaq7I1iEk.jpg",
-    width: 640,
-    height: 480,
-  },
-  {
     name: "Crepe Paper",
     src: "/sj-objio-XFWiZTa2Ub0.jpg",
     width: 640,
     height: 960,
+  },
+  {
+    name: "Painting Wall",
+    src: "/olga-thelavart-5Xkaq7I1iEk.jpg",
+    width: 640,
+    height: 480,
   },
   {
     name: "Bed Sheets",
@@ -31,14 +31,16 @@ export const textureBackgrounds: TextureBackground[] = [
 function createTextureStore() {
   const background = atom<TextureBackground>(textureBackgrounds[0]);
   const text = atom<string>("Clay");
-  const color = atom<string>("#891030");
+  const color = atom<string>("#e11d48");
   const fontSize = atom<number>(5);
+  const level = atom<number>(30);
 
   return {
     background,
     text,
     color,
     fontSize,
+    level,
   };
 }
 export default createTextureStore();

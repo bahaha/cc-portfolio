@@ -2,7 +2,7 @@
   import type { StoreValue } from "nanostores";
   import store from "./texture-store";
   type Store = StoreValue<typeof store>;
-  const { background, color, fontSize, text } = store as Store;
+  const { background, color, fontSize, level, text } = store as Store;
 </script>
 
 <svg viewBox={`0 0 ${$background.width} ${$background.height}`}>
@@ -27,7 +27,7 @@
       <feDisplacementMap
         in="SourceGraphic"
         in2="GrayscaleTextured"
-        scale="30"
+        scale={$level}
         xChannelSelector="R"
         yChannelSelector="R"
         result="TexturedText"
