@@ -2,15 +2,14 @@
   import type { StoreValue } from "nanostores";
   import store from "./texture-store";
   type Store = StoreValue<typeof store>;
-  const { text, color } = store as Store;
-  let { image } = $props();
+  const { background, text, color } = store as Store;
 </script>
 
-<svg viewBox="0 0 640 480">
+<svg viewBox={`0 0 ${$background.width} ${$background.height}`}>
   <defs>
     <filter id="blend-svelte">
       <feImage
-        href={image}
+        href={$background.src}
         x="0"
         y="0"
         width="100%"
@@ -43,7 +42,7 @@
         result="OpacityText"
       ></feColorMatrix>
       <feImage
-        href={image}
+        href={$background.src}
         x="0"
         y="0"
         width="100%"
@@ -56,7 +55,7 @@
     </filter>
   </defs>
   <image
-    href={image}
+    href={$background.src}
     x="0"
     y="0"
     width="100%"

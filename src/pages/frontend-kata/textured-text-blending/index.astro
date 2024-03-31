@@ -6,13 +6,12 @@ import TexturedBlendingSvelte from "@/components/textured-text-blending/textured
 
 <Layout>
     <h1
-        class="my-2 scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
+        class="container my-2 scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
     >
         Texture Blending
     </h1>
     <MaterialControls client:load />
-    <TexturedBlendingSvelte
-        client:load
-        image="/olga-thelavart-5Xkaq7I1iEk.jpg"
-    />
+    <main class="container my-4">
+        <TexturedBlendingSvelte client:load />
+    </main>
 </Layout>
