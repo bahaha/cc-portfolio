@@ -5,11 +5,12 @@ import vue from "@astrojs/vue";
 import svelte from "@astrojs/svelte";
 import react from "@astrojs/react";
 
+// FIXME: using analogjsangular() integration will cause typescript import sliently fail with undefined module import
 import analogjsangular from "@analogjs/astro-angular";
 
 // https://astro.build/config
 export default defineConfig({
   output: "server",
   adapter: aws(),
-  integrations: [tailwind(), vue(), svelte(), react(), analogjsangular()]
+  integrations: [tailwind(), vue(), svelte(), react()],
 });

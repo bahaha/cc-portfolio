@@ -1,8 +1,17 @@
 ---
-import Layout from "@/layouts/DefaultLayout.astro"
+import Layout from "@/layouts/DefaultLayout.astro";
+import MaterialControls from "@/components/textured-text-blending/material-controls.svelte";
+import TexturedBlendingSvelte from "@/components/textured-text-blending/textured-blending.svelte";
 ---
 
 <Layout>
-    <h1>Make text blend in with the background photo</h1>
+    <h1
+        class="container my-2 scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl"
+    >
+        Texture Blending
+    </h1>
+    <MaterialControls client:load />
+    <main class="container my-4">
+        <TexturedBlendingSvelte client:load />
+    </main>
 </Layout>
-
