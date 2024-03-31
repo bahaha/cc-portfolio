@@ -28,7 +28,7 @@
       <feDisplacementMap
         in="SourceGraphic"
         in2="GrayscaleTextured"
-        scale="15"
+        scale="30"
         xChannelSelector="R"
         yChannelSelector="R"
         result="TexturedText"

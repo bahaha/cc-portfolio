@@ -1,12 +1,7 @@
 ---
 import Layout from "@/layouts/DefaultLayout.astro";
-import $store from "@/components/textured-text-blending/texture-store";
-import TexturedBlendingAstro from "@/components/textured-text-blending/index.astro";
-import TexturedBlendingSvelte from "@/components/textured-text-blending/index.svelte";
 import MaterialControls from "@/components/textured-text-blending/material-controls.svelte";
-
-const text = $store.text.get();
-const color = $store.color.get();
+import TexturedBlendingSvelte from "@/components/textured-text-blending/textured-blending.svelte";
 ---
 
 <Layout>
@@ -16,18 +11,8 @@ const color = $store.color.get();
         Texture Blending
     </h1>
     <MaterialControls client:load />
-    <TexturedBlendingAstro
+    <TexturedBlendingSvelte
+        client:load
         image="/olga-thelavart-5Xkaq7I1iEk.jpg"
-        text={text}
-        color={color}
     />
-    <h3 class="scroll-m-20 text-2xl font-semibold tracking-tight text-svelte">
-        Svelte
-    </h3>
-    <section>
-        <TexturedBlendingSvelte
-            client:load
-            image="/olga-thelavart-5Xkaq7I1iEk.jpg"
-        />
-    </section>
 </Layout>
