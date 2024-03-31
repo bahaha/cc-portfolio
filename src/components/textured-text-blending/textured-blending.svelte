@@ -2,7 +2,7 @@
   import type { StoreValue } from "nanostores";
   import store from "./texture-store";
   type Store = StoreValue<typeof store>;
-  const { background, text, color } = store as Store;
+  const { background, color, fontSize, text } = store as Store;
 </script>
 
 <svg viewBox={`0 0 ${$background.width} ${$background.height}`}>
@@ -65,7 +65,7 @@
   <text
     x="50%"
     y="68%"
-    font-size="5rem"
+    font-size={`${$fontSize}rem`}
     font-weight="bold"
     text-anchor="middle"
     alignment-baseline="middle"

@@ -32,11 +32,13 @@ function createTextureStore() {
   const background = atom<TextureBackground>(textureBackgrounds[0]);
   const text = atom<string>("Clay");
   const color = atom<string>("#891030");
+  const fontSize = atom<number>(5);
 
   return {
     background,
     text,
     color,
+    fontSize,
   };
 }
 export default createTextureStore();

@@ -3,11 +3,15 @@
   import store, { textureBackgrounds } from "./texture-store";
   import { cn } from "@/utils/ui-helpers";
   type Store = StoreValue<typeof store>;
-  const { background, text, color } = store as Store;
+  const { background, color, fontSize, text } = store as Store;
 </script>
 
 <section class="bg-secondary container py-4">
-  <span class="font-semibold">Background</span>
+  <span
+    class="text=sm font-semibold leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  >
+    Background
+  </span>
   <div class="grid grid-cols-3 items-start gap-3">
     {#each textureBackgrounds as bg}
       <button on:click={() => background.set(bg)}>
@@ -21,6 +25,20 @@
       </button>
     {/each}
   </div>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  >
+    <span class="font-semibold">Font Size (rem unit)</span>
+    <div class="mb-4 mt-0.5 flex items-center gap-1">
+      <input
+        type="range"
+        step="0.5"
+        min="0.5"
+        max="20"
+        bind:value={$fontSize}
+      />
+    </div>
+  </label>
   <label
     class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
   >
