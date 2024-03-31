@@ -4,6 +4,27 @@
   import { cn } from "@/utils/ui-helpers";
   type Store = StoreValue<typeof store>;
   const { background, color, fontSize, level, text } = store as Store;
+
+  function asBackground(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        const image = new Image();
+        image.src = reader.result as string;
+        image.onload = function () {
+          background.set({
+            name: file.name,
+            src: image.src,
+            width: image.width,
+            height: image.height,
+          });
+        };
+      };
+      reader.readAsDataURL(file);
+    }
+  }
 </script>
 
 <section class="bg-secondary container py-2">
@@ -25,6 +46,17 @@
       </button>
     {/each}
   </div>
+  <label
+    class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+  >
+    <span class="font-semibold">Upload your own texture photos</span>
+    <input
+      class="block"
+      type="file"
+      accept="image/*"
+      on:change={asBackground}
+    />
+  </label>
   <label
     class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
   >
