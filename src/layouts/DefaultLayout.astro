@@ -2,7 +2,7 @@
 import "../page.pcss";
 ---
 
-<html lang="en">
+<html lang="en" class="dark h-full">
     <head>
         <meta charset="utf-8" />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -10,7 +10,13 @@ import "../page.pcss";
         <meta name="generator" content={Astro.generator} />
         <title>Astro</title>
     </head>
-    <body>
-        <slot />
+    <body
+        class="flex min-h-full flex-col bg-background text-foreground antialiased"
+    >
+        <header></header>
+        <div class="grow">
+            <slot />
+        </div>
+        <footer></footer>
     </body>
 </html>
