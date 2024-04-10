@@ -12,7 +12,12 @@ function generateWords({ length }: UseWordsOptions): string[] {
 export function useWords(options: UseWordsOptions) {
   const [words, setWords] = useState<string[]>(generateWords(options));
 
+  const regenerateWords = () => {
+    setWords(generateWords(options));
+  };
+
   return {
     words,
+    regenerateWords,
   };
 }
