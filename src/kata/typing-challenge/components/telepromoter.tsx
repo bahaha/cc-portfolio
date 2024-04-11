@@ -5,7 +5,7 @@ type TelepromoterProps = {
 export default function Telepromoter({ children }: TelepromoterProps) {
   return (
     <div
-      className="flex h-40 flex-wrap overflow-hidden text-3xl font-bold leading-relaxed"
+      className="relative h-40 overflow-hidden text-3xl font-bold leading-relaxed tracking-widest"
       style={{ fontVariant: "no-common-ligatures" }}
     >
       {children}
