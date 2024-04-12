@@ -7,7 +7,8 @@
     "start": "AWS_PROFILE=cc astro dev",
     "build": "AWS_PROFILE=cc astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest"
   },
   "dependencies": {
     "@analogjs/astro-angular": "^1.0.2",
@@ -60,6 +61,7 @@
     "prettier-plugin-svelte": "^3.2.2",
     "prettier-plugin-tailwindcss": "^0.5.13",
     "tailwindcss-animate": "^1.0.7",
-    "vite-plugin-svgr": "^4.2.0"
+    "vite-plugin-svgr": "^4.2.0",
+    "vitest": "^1.5.0"
   }
 }
