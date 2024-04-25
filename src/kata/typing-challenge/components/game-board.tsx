@@ -2,6 +2,7 @@
 import { motion } from "framer-motion";
 import { useEffect, useState, type ReactNode } from "react";
 
+import { useCountDown } from "../hooks/use-countdown";
 import { useElementsRef } from "../hooks/use-elements-ref";
 import { useTyping } from "../hooks/use-typing";
 import { useWords } from "../hooks/use-words";
@@ -9,6 +10,7 @@ import Rotate from "../rotate-ccw.svg?react";
 import Caret from "./caret";
 import RestartButton from "./restart-button";
 import Telepromoter from "./telepromoter";
+import Timer from "./timer";
 import Word from "./word";
 
 type GameBoardProps = {};
@@ -19,7 +21,7 @@ const variants = {
   visible: { opacity: 1 },
 };
 
-type ChallengeStatus = "pending" | "typing" | "completed";
+type ChallengeStatus = "pending" | "typing" | "paused" | "completed";
 
 type ChallengeAreaProps = {
   yOffset: number;
@@ -46,14 +48,26 @@ export default function GameBoard({}: GameBoardProps) {
   const { words, version, regenerateWords } = useWords({ length: 50 });
   const { lastEl, attachElementRef, pickElement } = useElementsRef();
   const { typed, range, clearTyped } = useTyping({
-    enable: status !== "completed",
+    enable: status === "pending" || status === "typing",
   });
   const [wordRowShiftOffset, setWordRowShiftOffset] = useState(0);
+  const {
+    isPaused,
+    remaining,
+    start,
+    reset: resetTimer,
+  } = useCountDown({
+    seconds: 60,
+    onPause: () => setStatus("paused"),
+    onResume: () => setStatus("pending"),
+    onEnd: () => setStatus("completed"),
+  });
 
   function handleRestartChallenge() {
     setStatus("pending");
     clearTyped();
     regenerateWords();
+    resetTimer();
   }
 
   function getTypedLetterStatus(
@@ -71,12 +85,24 @@ export default function GameBoard({}: GameBoardProps) {
   useEffect(() => {
     if (status === "pending" && typed.length > 0) {
       setStatus("typing");
+      start();
     }
   }, [status, typed]);
 
   return (
     <div className="container flex h-screen max-w-5xl flex-col items-center justify-center gap-4 bg-background">
+      {status === "completed" && <div>Great spot! Your score</div>}
+      <Timer seconds={remaining} />
       <Telepromoter>
+        {isPaused && (
+          <div
+            className="absolute inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 supports-[backdrop-filter]:bg-background/60"
+            data-role="overlay"
+            data-state={isPaused ? "open" : "closed"}
+          >
+            Paused
+          </div>
+        )}
         <Caret rowOffset={-wordRowShiftOffset} lastLetterEl={lastEl} />
         <ChallengeArea key={version} yOffset={-wordRowShiftOffset}>
           {words.map((letters, w) => (
