@@ -13,6 +13,8 @@ import RestartButton from "./restart-button";
 import Telepromoter from "./telepromoter";
 import Timer from "./timer";
 import Word from "./word";
+import { useTypingHero } from "../hooks/use-typing-report";
+import TypingHero from "./typing-hero";
 
 type GameBoardProps = {};
 
@@ -64,6 +66,13 @@ export default function GameBoard({}: GameBoardProps) {
     onResume: () => setStatus("pending"),
     onEnd: () => setStatus("completed"),
   });
+  const typingHero = useTypingHero({
+    enable: status === "completed",
+    duration,
+    remaining,
+    words,
+    typed,
+  });
 
   function handleRestartChallenge() {
     setStatus("pending");
@@ -87,6 +96,11 @@ export default function GameBoard({}: GameBoardProps) {
 
   useEffect(() => {
     pickElement([range.word, range.letter]);
+    const inLastWord = range.word === words.length - 1;
+    const inLastLetter = range.letter === words[range.word]?.length;
+    if (inLastWord && inLastLetter) {
+      setStatus("completed");
+    }
   }, [range.word, range.letter]);
 
   useEffect(() => {
@@ -104,11 +118,9 @@ export default function GameBoard({}: GameBoardProps) {
           onDurationChange={handleDurationChange}
         />
       )}
-      {(status === "typing" || status === "paused") && (
-        <Timer seconds={remaining} />
-      )}
+      {status === "typing" && <Timer seconds={remaining} />}
       <Telepromoter>
-        {isPaused && (
+        {status !== "completed" && isPaused && (
           <div
             className="absolute inset-0 z-50 flex items-center justify-center bg-background/95 backdrop-blur data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 supports-[backdrop-filter]:bg-background/60"
             data-role="overlay"
@@ -151,7 +163,13 @@ export default function GameBoard({}: GameBoardProps) {
           ))}
         </ChallengeArea>
       </Telepromoter>
-      {status === "completed" && <div>Great spot! Your score</div>}
+      {status === "completed" && typingHero && (
+        <TypingHero
+          className="absolute bottom-4"
+          tpm={typingHero.tpm}
+          accuracy={typingHero.accuracyRate}
+        />
+      )}
       <RestartButton onClick={handleRestartChallenge}>
         <Rotate />
       </RestartButton>

@@ -29,7 +29,8 @@ export function useCountDown({
     intervalRef.current = setInterval(() => {
       setRemaining((time) => {
         if (time <= 1) {
-          pause();
+          intervalRef.current && clearInterval(intervalRef.current);
+          intervalRef.current = null;
           onEnd?.();
         }
         return time - 1;
@@ -38,10 +39,10 @@ export function useCountDown({
   }, [hasEnded, running, setRemaining]);
 
   const pause = useCallback(() => {
-    if (hasEnded || !running) return;
+    if (!running) return;
     intervalRef.current && clearInterval(intervalRef.current);
     intervalRef.current = null;
-  }, [hasEnded, running]);
+  }, [running]);
 
   const reset = useCallback(
     (nextSeconds?: number) => {
@@ -67,11 +68,17 @@ export function useCountDown({
     } else {
       window.addEventListener("focus", handleFocus);
     }
+
+    if (remaining <= 0) {
+      window.removeEventListener("blur", handleFocusLeave);
+      window.removeEventListener("focus", handleFocus);
+    }
+
     return () => {
       window.removeEventListener("blur", handleFocusLeave);
       window.removeEventListener("focus", handleFocus);
     };
-  }, [running, autoPauseOnBlur, onPause, onResume]);
+  }, [running, remaining, autoPauseOnBlur, onPause, onResume]);
 
   useEffect(() => {
     return () => {
