@@ -8,6 +8,7 @@ import { useTyping } from "../hooks/use-typing";
 import { useWords } from "../hooks/use-words";
 import Rotate from "../rotate-ccw.svg?react";
 import Caret from "./caret";
+import { ChallengeConfig } from "./challenge-config";
 import RestartButton from "./restart-button";
 import Telepromoter from "./telepromoter";
 import Timer from "./timer";
@@ -51,13 +52,14 @@ export default function GameBoard({}: GameBoardProps) {
     enable: status === "pending" || status === "typing",
   });
   const [wordRowShiftOffset, setWordRowShiftOffset] = useState(0);
+  const [duration, setDuration] = useState(60);
   const {
     isPaused,
     remaining,
     start,
     reset: resetTimer,
   } = useCountDown({
-    seconds: 60,
+    seconds: duration,
     onPause: () => setStatus("paused"),
     onResume: () => setStatus("pending"),
     onEnd: () => setStatus("completed"),
@@ -68,6 +70,11 @@ export default function GameBoard({}: GameBoardProps) {
     clearTyped();
     regenerateWords();
     resetTimer();
+  }
+
+  function handleDurationChange(nextDuration: number) {
+    setDuration(nextDuration);
+    resetTimer(nextDuration);
   }
 
   function getTypedLetterStatus(
@@ -91,8 +98,15 @@ export default function GameBoard({}: GameBoardProps) {
 
   return (
     <div className="container flex h-screen max-w-5xl flex-col items-center justify-center gap-4 bg-background">
-      {status === "completed" && <div>Great spot! Your score</div>}
-      <Timer seconds={remaining} />
+      {status === "pending" && typed.length === 0 && (
+        <ChallengeConfig
+          currentDuration={duration}
+          onDurationChange={handleDurationChange}
+        />
+      )}
+      {(status === "typing" || status === "paused") && (
+        <Timer seconds={remaining} />
+      )}
       <Telepromoter>
         {isPaused && (
           <div
@@ -103,7 +117,9 @@ export default function GameBoard({}: GameBoardProps) {
             Paused
           </div>
         )}
-        <Caret rowOffset={-wordRowShiftOffset} lastLetterEl={lastEl} />
+        {status !== "completed" && (
+          <Caret rowOffset={-wordRowShiftOffset} lastLetterEl={lastEl} />
+        )}
         <ChallengeArea key={version} yOffset={-wordRowShiftOffset}>
           {words.map((letters, w) => (
             <Word
@@ -135,6 +151,7 @@ export default function GameBoard({}: GameBoardProps) {
           ))}
         </ChallengeArea>
       </Telepromoter>
+      {status === "completed" && <div>Great spot! Your score</div>}
       <RestartButton onClick={handleRestartChallenge}>
         <Rotate />
       </RestartButton>

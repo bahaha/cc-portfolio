@@ -43,9 +43,12 @@ export function useCountDown({
     intervalRef.current = null;
   }, [hasEnded, running]);
 
-  const reset = useCallback(() => {
-    setRemaining(seconds);
-  }, [seconds, setRemaining]);
+  const reset = useCallback(
+    (nextSeconds?: number) => {
+      setRemaining(nextSeconds ?? seconds);
+    },
+    [seconds, setRemaining],
+  );
 
   useEffect(() => {
     if (!autoPauseOnBlur) return;
