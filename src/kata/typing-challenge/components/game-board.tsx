@@ -58,9 +58,11 @@ export default function GameBoard({}: GameBoardProps) {
   const {
     isPaused,
     remaining,
-    start,
+    start: startTimer,
+    pause: pauseTimer,
     reset: resetTimer,
   } = useCountDown({
+    enable: status !== "completed",
     seconds: duration,
     onPause: () => setStatus("paused"),
     onResume: () => setStatus("pending"),
@@ -81,6 +83,11 @@ export default function GameBoard({}: GameBoardProps) {
     resetTimer();
   }
 
+  function handleChallengeEnd() {
+    setStatus("completed");
+    pauseTimer();
+  }
+
   function handleDurationChange(nextDuration: number) {
     setDuration(nextDuration);
     resetTimer(nextDuration);
@@ -96,17 +103,18 @@ export default function GameBoard({}: GameBoardProps) {
 
   useEffect(() => {
     pickElement([range.word, range.letter]);
-    const inLastWord = range.word === words.length - 1;
+    const inLastWord = range.word === words.length;
+    const inPreviousWord = range.word === words.length - 1;
     const inLastLetter = range.letter === words[range.word]?.length;
-    if (inLastWord && inLastLetter) {
-      setStatus("completed");
+    if (inLastWord || (inPreviousWord && inLastLetter)) {
+      handleChallengeEnd();
     }
   }, [range.word, range.letter]);
 
   useEffect(() => {
     if (status === "pending" && typed.length > 0) {
       setStatus("typing");
-      start();
+      startTimer();
     }
   }, [status, typed]);
 

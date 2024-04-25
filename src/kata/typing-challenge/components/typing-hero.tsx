@@ -20,7 +20,7 @@ export function TypingHero({ className, tpm, accuracy }: TypingHeroProps) {
     >
       <div className="flex flex-col space-y-1.5 p-6">
         <h3 className="text-2xl font-semibold leading-none tracking-tight">
-          You're a <span className="text-bold text-primary">Typing Hero !</span>
+          You're a <span className="font-bold text-primary">Typing Hero !</span>
         </h3>
       </div>
       <div className="p-6 pt-0">
@@ -31,7 +31,7 @@ export function TypingHero({ className, tpm, accuracy }: TypingHeroProps) {
           </div>
           <div className="flex flex-col space-y-1">
             <span className="text-sm font-semibold">Accuracy</span>
-            <span className="text-4xl font-semibold">{accuracy}%</span>
+            <span className="text-4xl font-semibold">{accuracy * 100}%</span>
           </div>
         </div>
       </div>

@@ -44,6 +44,11 @@ function sumAccuracy(acc: Accuracy, curr: Accuracy): Accuracy {
   };
 }
 
+function round(value: number, precision: number) {
+  const factor = Math.pow(10, precision);
+  return Math.round(value * factor) / factor;
+}
+
 export function useTypingHero({
   enable = false,
   duration,
@@ -61,14 +66,12 @@ export function useTypingHero({
   const tpm = Math.round(
     ((accuracy.correct + accuracy.incorrect) / elapsed) * 60,
   );
-  const accuracyRate =
-    Math.round(
-      (accuracy.correct /
-        (accuracy.correct + accuracy.incorrect + accuracy.extra) +
-        Number.EPSILON) *
-        100 *
-        100,
-    ) / 100;
+  const accuracyRate = round(
+    accuracy.correct /
+      (accuracy.correct + accuracy.incorrect + accuracy.extra) +
+      Number.EPSILON,
+    2,
+  );
 
   return {
     tpm,

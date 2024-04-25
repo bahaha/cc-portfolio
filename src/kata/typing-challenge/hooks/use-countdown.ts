@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
 type UseCountDownOptions = {
+  enable?: boolean;
   seconds: number;
   autoPauseOnBlur?: boolean;
   onPause?: () => void;
@@ -12,6 +13,7 @@ type UseCountDownOptions = {
 // so it's nice to use a intuitive setInterval approach,
 // or maybe a worker will be better to handle accurate time processing
 export function useCountDown({
+  enable = true,
   seconds,
   autoPauseOnBlur = true,
   onPause,
@@ -63,22 +65,25 @@ export function useCountDown({
       onResume?.();
     }
 
+    function clearup() {
+      window.removeEventListener("blur", handleFocusLeave);
+      window.removeEventListener("focus", handleFocus);
+    }
+
     if (running) {
       window.addEventListener("blur", handleFocusLeave);
     } else {
       window.addEventListener("focus", handleFocus);
     }
 
-    if (remaining <= 0) {
-      window.removeEventListener("blur", handleFocusLeave);
-      window.removeEventListener("focus", handleFocus);
+    if (remaining <= 0 || !enable) {
+      clearup();
     }
 
     return () => {
-      window.removeEventListener("blur", handleFocusLeave);
-      window.removeEventListener("focus", handleFocus);
+      clearup();
     };
-  }, [running, remaining, autoPauseOnBlur, onPause, onResume]);
+  }, [running, remaining, enable, autoPauseOnBlur, onPause, onResume]);
 
   useEffect(() => {
     return () => {
