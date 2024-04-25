@@ -1,6 +1,6 @@
 /// <reference types="vite-plugin-svgr/client" />
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 import { useElementsRef } from "../hooks/use-elements-ref";
 import { useTyping } from "../hooks/use-typing";
@@ -13,12 +13,33 @@ import Word from "./word";
 
 type GameBoardProps = {};
 
+const MAX_EXTRA_LETTERS = 6;
 const variants = {
   hidden: { opacity: 0 },
   visible: { opacity: 1 },
 };
 
 type ChallengeStatus = "pending" | "typing" | "completed";
+
+type ChallengeAreaProps = {
+  yOffset: number;
+  children: ReactNode;
+};
+function ChallengeArea({ yOffset, children }: ChallengeAreaProps) {
+  return (
+    <motion.div
+      className="flex flex-wrap transition-transform duration-300"
+      style={{ transform: `translateY(${yOffset}px)` }}
+      initial="hidden"
+      animate="visible"
+      exit="hidden"
+      variants={variants}
+      transition={{ duration: 1.5, type: "spring" }}
+    >
+      {children}
+    </motion.div>
+  );
+}
 
 export default function GameBoard({}: GameBoardProps) {
   const [status, setStatus] = useState<ChallengeStatus>("pending");
@@ -27,6 +48,7 @@ export default function GameBoard({}: GameBoardProps) {
   const { typed, range, clearTyped } = useTyping({
     enable: status !== "completed",
   });
+  const [wordRowShiftOffset, setWordRowShiftOffset] = useState(0);
 
   function handleRestartChallenge() {
     setStatus("pending");
@@ -55,18 +77,14 @@ export default function GameBoard({}: GameBoardProps) {
   return (
     <div className="container flex h-screen max-w-5xl flex-col items-center justify-center gap-4 bg-background">
       <Telepromoter>
-        <Caret lastLetterEl={lastEl} />
-        <motion.div
-          key={version}
-          className="flex flex-wrap"
-          initial="hidden"
-          animate="visible"
-          exit="hidden"
-          variants={variants}
-          transition={{ duration: 1.5, type: "spring" }}
-        >
+        <Caret rowOffset={-wordRowShiftOffset} lastLetterEl={lastEl} />
+        <ChallengeArea key={version} yOffset={-wordRowShiftOffset}>
           {words.map((letters, w) => (
-            <Word key={w} active={range?.word === w}>
+            <Word
+              key={w}
+              active={range?.word === w}
+              onRowFocus={setWordRowShiftOffset}
+            >
               {letters.map((letter, i) => (
                 <Word.Letter
                   ref={attachElementRef([w, i])}
@@ -76,9 +94,20 @@ export default function GameBoard({}: GameBoardProps) {
                   {letter}
                 </Word.Letter>
               ))}
+              {typed[w]
+                ?.slice(letters.length, letters.length + MAX_EXTRA_LETTERS)
+                .map((extra, i) => (
+                  <Word.Letter
+                    ref={attachElementRef([w, letters.length + i])}
+                    key={`extra_${w}_${i}`}
+                    status="extra"
+                  >
+                    {extra}
+                  </Word.Letter>
+                ))}
             </Word>
           ))}
-        </motion.div>
+        </ChallengeArea>
       </Telepromoter>
       <RestartButton onClick={handleRestartChallenge}>
         <Rotate />
