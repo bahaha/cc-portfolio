@@ -1,54 +1,65 @@
 /// <reference types="vite-plugin-svgr/client" />
-import { motion } from "framer-motion";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 import { useCountDown } from "../hooks/use-countdown";
 import { useElementsRef } from "../hooks/use-elements-ref";
 import { useTyping } from "../hooks/use-typing";
+import { useTypingHero } from "../hooks/use-typing-report";
 import { useWords } from "../hooks/use-words";
 import Rotate from "../rotate-ccw.svg?react";
 import Caret from "./caret";
+import ChallengeArea from "./challenge-area";
 import { ChallengeConfig } from "./challenge-config";
 import RestartButton from "./restart-button";
 import Telepromoter from "./telepromoter";
 import Timer from "./timer";
-import Word from "./word";
-import { useTypingHero } from "../hooks/use-typing-report";
 import TypingHero from "./typing-hero";
+import Word from "./word";
 
 type GameBoardProps = {};
 
 const MAX_EXTRA_LETTERS = 6;
-const variants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1 },
-};
 
 type ChallengeStatus = "pending" | "typing" | "paused" | "completed";
 
-type ChallengeAreaProps = {
-  yOffset: number;
-  children: ReactNode;
+type UseChallengerTypingOptions = {
+  words: string[][];
+  range: ReturnType<typeof useTyping>["range"];
+  onTypingLetterChange?: (word: number, letter: number) => void;
+  onEnd?: () => void;
 };
-function ChallengeArea({ yOffset, children }: ChallengeAreaProps) {
-  return (
-    <motion.div
-      className="flex flex-wrap transition-transform duration-300"
-      style={{ transform: `translateY(${yOffset}px)` }}
-      initial="hidden"
-      animate="visible"
-      exit="hidden"
-      variants={variants}
-      transition={{ duration: 1.5, type: "spring" }}
-    >
-      {children}
-    </motion.div>
-  );
+function useChallengerTyping({
+  words,
+  range,
+  onTypingLetterChange,
+  onEnd,
+}: UseChallengerTypingOptions) {
+  const inLastWord = range.word === words.length;
+  const inPreviousWord = range.word === words.length - 1;
+  const inLastLetter = range.letter === words[range.word]?.length;
+
+  useEffect(() => {
+    if (inLastWord || (inPreviousWord && inLastLetter)) {
+      onEnd?.();
+    }
+  }, [inLastWord, inPreviousWord, inLastLetter]);
+
+  useEffect(() => {
+    onTypingLetterChange?.(range.word, range.letter);
+  }, [range.word, range.letter]);
+}
+
+function getTypedLetterStatus(
+  expect: string,
+  typed?: string,
+): "default" | "correct" | "incorrect" {
+  if (!typed) return "default";
+  return typed === expect ? "correct" : "incorrect";
 }
 
 export default function GameBoard({}: GameBoardProps) {
   const [status, setStatus] = useState<ChallengeStatus>("pending");
-  const { words, version, regenerateWords } = useWords({ length: 50 });
+  const { words, version, regenerateWords } = useWords({ length: 5 });
   const { lastEl, attachElementRef, pickElement } = useElementsRef();
   const { typed, range, clearTyped } = useTyping({
     enable: status === "pending" || status === "typing",
@@ -59,7 +70,6 @@ export default function GameBoard({}: GameBoardProps) {
     isPaused,
     remaining,
     start: startTimer,
-    pause: pauseTimer,
     reset: resetTimer,
   } = useCountDown({
     enable: status !== "completed",
@@ -76,6 +86,13 @@ export default function GameBoard({}: GameBoardProps) {
     typed,
   });
 
+  useChallengerTyping({
+    words,
+    range,
+    onEnd: () => setStatus("completed"),
+    onTypingLetterChange: (word, letter) => pickElement([word, letter]),
+  });
+
   function handleRestartChallenge() {
     setStatus("pending");
     clearTyped();
@@ -83,33 +100,10 @@ export default function GameBoard({}: GameBoardProps) {
     resetTimer();
   }
 
-  function handleChallengeEnd() {
-    setStatus("completed");
-    pauseTimer();
-  }
-
   function handleDurationChange(nextDuration: number) {
     setDuration(nextDuration);
     resetTimer(nextDuration);
   }
-
-  function getTypedLetterStatus(
-    expect: string,
-    typed?: string,
-  ): "default" | "correct" | "incorrect" {
-    if (!typed) return "default";
-    return typed === expect ? "correct" : "incorrect";
-  }
-
-  useEffect(() => {
-    pickElement([range.word, range.letter]);
-    const inLastWord = range.word === words.length;
-    const inPreviousWord = range.word === words.length - 1;
-    const inLastLetter = range.letter === words[range.word]?.length;
-    if (inLastWord || (inPreviousWord && inLastLetter)) {
-      handleChallengeEnd();
-    }
-  }, [range.word, range.letter]);
 
   useEffect(() => {
     if (status === "pending" && typed.length > 0) {

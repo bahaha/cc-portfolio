@@ -1,5 +1,44 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 
+type UseAutoTypeBreakingOptions = {
+  enable?: boolean;
+  running?: boolean;
+  onPause?: () => void;
+  onResume?: () => void;
+};
+
+function useAutoTypeBreaking({
+  enable = true,
+  running = true,
+  onPause,
+  onResume,
+}: UseAutoTypeBreakingOptions) {
+  useEffect(() => {
+    function clearup() {
+      onPause && window.removeEventListener("blur", onPause);
+      onResume && window.removeEventListener("focus", onResume);
+    }
+
+    if (!enable) {
+      onPause?.();
+      clearup();
+      return;
+    }
+
+    if (running) {
+      onPause && window.addEventListener("blur", onPause);
+      onResume && window.removeEventListener("focus", onResume);
+    } else {
+      onResume && window.addEventListener("focus", onResume);
+      onPause && window.removeEventListener("blur", onPause);
+    }
+
+    return () => {
+      clearup();
+    };
+  }, [enable, onPause, onResume]);
+}
+
 type UseCountDownOptions = {
   enable?: boolean;
   seconds: number;
@@ -34,6 +73,7 @@ export function useCountDown({
           intervalRef.current && clearInterval(intervalRef.current);
           intervalRef.current = null;
           onEnd?.();
+          return 0;
         }
         return time - 1;
       });
@@ -53,37 +93,15 @@ export function useCountDown({
     [seconds, setRemaining],
   );
 
-  useEffect(() => {
-    if (!autoPauseOnBlur) return;
-
-    function handleFocusLeave() {
+  useAutoTypeBreaking({
+    enable: autoPauseOnBlur && enable && !hasEnded,
+    running,
+    onPause: () => {
       pause();
-      onPause?.();
-    }
-
-    function handleFocus() {
-      onResume?.();
-    }
-
-    function clearup() {
-      window.removeEventListener("blur", handleFocusLeave);
-      window.removeEventListener("focus", handleFocus);
-    }
-
-    if (running) {
-      window.addEventListener("blur", handleFocusLeave);
-    } else {
-      window.addEventListener("focus", handleFocus);
-    }
-
-    if (remaining <= 0 || !enable) {
-      clearup();
-    }
-
-    return () => {
-      clearup();
-    };
-  }, [running, remaining, enable, autoPauseOnBlur, onPause, onResume]);
+      enable && onPause?.();
+    },
+    onResume,
+  });
 
   useEffect(() => {
     return () => {
