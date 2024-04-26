@@ -59,7 +59,7 @@ function getTypedLetterStatus(
 
 export default function GameBoard({}: GameBoardProps) {
   const [status, setStatus] = useState<ChallengeStatus>("pending");
-  const { words, version, regenerateWords } = useWords({ length: 5 });
+  const { words, version, regenerateWords } = useWords({ length: 50 });
   const { lastEl, attachElementRef, pickElement } = useElementsRef();
   const { typed, range, clearTyped } = useTyping({
     enable: status === "pending" || status === "typing",
