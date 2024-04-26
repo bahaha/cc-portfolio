@@ -21,9 +21,9 @@ function countLetters(word: string[], typed: string[] | undefined): Accuracy {
     return { correct, incorrect, extra };
   }
 
-  for (let i = 0; i < typed.length; i++) {
-    const letter = typed[i];
-    if (letter === word[i]) {
+  for (let i = 0; i < word.length; i++) {
+    const letter = word[i];
+    if (letter === typed[i]) {
       correct++;
     } else {
       incorrect++;
@@ -63,15 +63,15 @@ export function useTypingHero({
     .map((word, index) => countLetters(word, typed[index]))
     .reduce(sumAccuracy, { correct: 0, incorrect: 0, extra: 0 });
 
-  const tpm = Math.round(
-    ((accuracy.correct + accuracy.incorrect) / elapsed) * 60,
-  );
-  const accuracyRate = round(
-    accuracy.correct /
-      (accuracy.correct + accuracy.incorrect + accuracy.extra) +
-      Number.EPSILON,
-    2,
-  );
+  const tpm = Math.round((accuracy.correct / elapsed) * 60);
+
+  const totalTypedLetters =
+    accuracy.correct + accuracy.incorrect + accuracy.extra;
+
+  const accuracyRate =
+    totalTypedLetters === 0
+      ? 0
+      : round(accuracy.correct / totalTypedLetters + Number.EPSILON, 2);
 
   return {
     tpm,
