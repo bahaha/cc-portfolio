@@ -1,6 +1,6 @@
 <script lang="ts">
   import type { StoreValue } from "nanostores";
-  import store from "./texture-store";
+  import store from "../texture-store";
   type Store = StoreValue<typeof store>;
   const { background, color, fontSize, level, text } = store as Store;
 </script>

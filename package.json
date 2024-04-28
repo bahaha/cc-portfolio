@@ -7,7 +7,8 @@
     "start": "AWS_PROFILE=cc astro dev",
     "build": "AWS_PROFILE=cc astro check && astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "test": "vitest"
   },
   "dependencies": {
     "@analogjs/astro-angular": "^1.0.2",
@@ -26,11 +27,14 @@
     "@astrojs/svelte": "^5.2.0",
     "@astrojs/tailwind": "^5.1.0",
     "@astrojs/vue": "^4.0.9",
+    "@faker-js/faker": "^8.4.1",
     "@types/react": "^18.2.73",
     "@types/react-dom": "^18.2.23",
     "astro": "^4.5.12",
     "astro-sst": "^2.41.2",
+    "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "framer-motion": "^11.0.27",
     "nanostores": "^0.10.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -48,13 +52,18 @@
   "devDependencies": {
     "@astrojs/ts-plugin": "^1.6.1",
     "@tailwindcss/typography": "^0.5.12",
+    "@testing-library/react": "^15.0.4",
     "@typescript-eslint/parser": "^7.4.0",
     "eslint": "^8.57.0",
     "eslint-plugin-astro": "^0.33.1",
     "eslint-plugin-jsx-a11y": "^6.8.0",
+    "jsdom": "^24.0.0",
     "prettier": "^3.2.5",
     "prettier-plugin-astro": "^0.13.0",
     "prettier-plugin-svelte": "^3.2.2",
-    "prettier-plugin-tailwindcss": "^0.5.13"
+    "prettier-plugin-tailwindcss": "^0.5.13",
+    "tailwindcss-animate": "^1.0.7",
+    "vite-plugin-svgr": "^4.2.0",
+    "vitest": "^1.5.0"
   }
 }

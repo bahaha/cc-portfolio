@@ -58,9 +58,22 @@ const config = {
       fontFamily: {
         sans: ["Inter", ...fontFamily.sans],
       },
+      keyframes: {
+        caretFlash: {
+          "0%, 100%": {
+            opacity: 1,
+          },
+          "50%": {
+            opacity: 0,
+          },
+        },
+      },
+      animation: {
+        "caret-flash": "caretFlash 1.5s infinite",
+      },
     },
   },
-  plugins: [require("@tailwindcss/typography")],
+  plugins: [require("@tailwindcss/typography"), require("tailwindcss-animate")],
 };
 
 export default config;
