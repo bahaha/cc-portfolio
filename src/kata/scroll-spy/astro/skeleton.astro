@@ -1,0 +1,14 @@
+---
+type Props = {
+    height: number;
+};
+
+const { height } = Astro.props;
+const bg = ["bg-sky-100", "bg-amber-100", "bg-rose-100", "bg-lime-100"];
+function randomBg() {
+    return bg[Math.floor(Math.random() * bg.length)];
+}
+---
+
+<div class={`my-4 w-full ${randomBg()}`} style={{ height: `${height}px` }}>
+</div>
