@@ -113,11 +113,84 @@ const article: Section[] = [
 <script>
     (() => {
         const toc = document.querySelector("[data-role=toc]");
-        const tocAnchors = document.querySelectorAll(
-            "[data-role=toc] a[href^='#']",
-        );
+        if (!toc) return;
 
-        listenClickOnAnchors(tocAnchors);
+        const FORWARD_TOP_THRESHOLD = 300;
+        const BACKWARD_HEIGHT_RATIO = 0.618;
+        const { anchors, sectionTitles } = readPageAnchors();
+
+        listenClickOnAnchors(anchors);
+        window.addEventListener("scroll", debounce(handlePageScroll, 100));
+        handlePageScroll();
+
+        function handlePageScroll() {
+            // approach I: use page y offset to find the active section; pageYOffset is deprecated
+            // const yOffset = document.documentElement.scrollTop;
+
+            // approach II: find the active section by calculating the rect of boundary sections with offset
+            // binary search can be used to optimize the search if the anchors are sorted which is the common case
+            let lo = 0;
+            let hi = sectionTitles.length;
+
+            let topSectionIndex: number = -1;
+            while (lo < hi) {
+                const mid = lo + Math.floor((hi - lo) / 2);
+                const rect = sectionTitles[mid].getBoundingClientRect();
+                const isSectionNearTop =
+                    rect.top >= 0 && rect.top <= FORWARD_TOP_THRESHOLD;
+
+                if (
+                    isSectionNearTop ||
+                    isNextSectionOutOfViewport(rect.top, mid)
+                ) {
+                    topSectionIndex = mid;
+                    hi = mid;
+                } else if (rect.bottom < 0) {
+                    lo = mid + 1;
+                } else {
+                    hi = mid;
+                }
+            }
+
+            if (topSectionIndex === -1) {
+                // TODO: find an approach to handle the case when only part of bottom of section are visible.
+                return;
+            }
+
+            highlight(anchors[topSectionIndex]);
+
+            function isNextSectionOutOfViewport(top: number, index: number) {
+                if (top >= 0) return false;
+                const nextRect =
+                    sectionTitles[index + 1]?.getBoundingClientRect();
+                if (!nextRect) return false;
+                return (
+                    nextRect.top >
+                    document.documentElement.clientHeight *
+                        BACKWARD_HEIGHT_RATIO
+                );
+            }
+        }
+
+        function readPageAnchors() {
+            const anchors = document.querySelectorAll(
+                "[data-role=toc] a[href^='#']",
+            );
+            const sectionTitles = [];
+
+            for (const anchor of anchors) {
+                const titleEl = document.querySelector(
+                    anchor.getAttribute("href")!,
+                ) as HTMLElement | null;
+                if (titleEl) {
+                    sectionTitles.push(titleEl);
+                }
+                // TODO: find a approach to calculate the height threshold of each section
+                //  to easy find the active section by height => height > yOffset + OFFSET_THRESHOLD,
+            }
+
+            return { anchors, sectionTitles };
+        }
 
         function listenClickOnAnchors(elements: NodeListOf<Element>) {
             for (const el of elements) {
@@ -129,7 +202,7 @@ const article: Section[] = [
             }
         }
 
-        function highlight(selector: string | HTMLElement) {
+        function highlight(selector: string | Element) {
             const highlightClass: string[] = ["text-primary"];
             if (!toc) return;
             const activeItem = toc.querySelector("[data-state=active]");
@@ -150,6 +223,16 @@ const article: Section[] = [
 
             el.setAttribute("data-state", "active");
             el.classList.add(...highlightClass);
+        }
+
+        function debounce(fn, delay: number) {
+            let timeout: NodeJS.Timeout | undefined;
+            return function _debounce(...args: any[]) {
+                clearTimeout(timeout);
+                timeout = setTimeout(() => {
+                    fn(...args);
+                }, delay);
+            };
         }
     })();
 </script>
