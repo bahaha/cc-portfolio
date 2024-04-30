@@ -12,6 +12,7 @@ type ScrollSpyOptions = {
   nav: string | HTMLElement;
   activeClass: string | string[];
   topThreshold?: number;
+  getSectionEl?: (anchorEl: HTMLElement) => HTMLElement;
 };
 
 export function ScrollSpy(option: ScrollSpyOptions) {
@@ -19,11 +20,14 @@ export function ScrollSpy(option: ScrollSpyOptions) {
     ? option.activeClass
     : [option.activeClass];
   const topThreshold = option.topThreshold ?? 300;
+  const getSectionEl = option.getSectionEl ?? ((el) => el);
+
   const nav =
     typeof option.nav === "string"
       ? document.querySelector<HTMLElement>(option.nav)
       : option.nav;
   const { anchors, sections } = readPageAnchors();
+  const sectionHeights = getSectionHeights(sections);
 
   function listen() {
     highlightSectionOnAnchorClick();
@@ -32,12 +36,36 @@ export function ScrollSpy(option: ScrollSpyOptions) {
   }
 
   function handlePageScroll() {
-    // approach I: use page y offset to find the active section; pageYOffset is deprecated
-    // const yOffset = document.documentElement.scrollTop;
+    const viewportHeight = document.documentElement.clientHeight;
+    // approach I: use page y offset to find the active section
+    // const yOffset = document.documentElement.scrollTop; // pageYOffset is deprecated.
+    // PROS:
+    // - search is fast with binary search since the start, end position of sections are sorted
+    // CONS:
+    // - if section height is dynamic, the active section may not be accurate
+    // - the layout of html elements are restrict to find the actual section height
+    let lo = 0;
+    let hi = sectionHeights.length;
+
+    const yOffset = document.documentElement.scrollTop;
+    while (lo < hi) {
+      const mid = lo + Math.floor((hi - lo) / 2);
+      const { begin, end } = sectionHeights[mid];
+
+      if (begin === yOffset + topThreshold) {
+        highlight(anchors[mid]);
+        return;
+      } else if (begin > yOffset + topThreshold) {
+        hi = mid;
+      } else {
+        lo = mid + 1;
+      }
+    }
+
+    highlight(anchors[lo - 1]);
 
     // approach II: find the active section by calculating the rect of boundary sections with offset
     // binary search can be used to optimize the search if the anchors are sorted which is the common case
-    const viewportHeight = document.documentElement.clientHeight;
     // FIXME: find an approach to determine if the active section
     // is above or below the viewport to adopt the binary search
 
@@ -66,25 +94,25 @@ export function ScrollSpy(option: ScrollSpyOptions) {
     //
     // highlight(anchors[lo]);
 
-    let activeSection = -1;
-    for (let i = 0; i < sections.length; i++) {
-      const section = sections[i];
-      const rect = section.getBoundingClientRect();
+    // let activeSection = -1;
+    // for (let i = 0; i < sections.length; i++) {
+    //   const section = sections[i];
+    //   const rect = section.getBoundingClientRect();
+    //
+    //   if (
+    //     isSectionNearTop(rect) ||
+    //     isSectionOverflown(rect, sections.indexOf(section))
+    //   ) {
+    //     activeSection = i;
+    //     break;
+    //   }
+    // }
+    //
+    // highlight(anchors[activeSection]);
 
-      if (
-        isSectionNearTop(rect) ||
-        isSectionOverflown(rect, sections.indexOf(section))
-      ) {
-        activeSection = i;
-        break;
-      }
-    }
-
-    highlight(anchors[activeSection]);
-
-    function isSectionInView(rect: DOMRect) {
-      return rect.top >= 0 && rect.top <= viewportHeight;
-    }
+    // function isSectionInView(rect: DOMRect) {
+    //   return rect.top >= 0 && rect.top <= viewportHeight;
+    // }
 
     /**
      *  +-------------+ <- viewport top
@@ -97,9 +125,9 @@ export function ScrollSpy(option: ScrollSpyOptions) {
      *  |             |
      *  +-------------+ <- viewport bottom
      */
-    function isSectionNearTop(rect: DOMRect) {
-      return isSectionInView(rect) && rect.top <= topThreshold;
-    }
+    // function isSectionNearTop(rect: DOMRect) {
+    //   return isSectionInView(rect) && rect.top <= topThreshold;
+    // }
 
     /**
      *    +---------+  <- section I top             +---------+  <- section I top
@@ -116,14 +144,14 @@ export function ScrollSpy(option: ScrollSpyOptions) {
      *    +---------+  <- section II top
      *    |#########|
      */
-    function isSectionOverflown(rect: DOMRect, index: number) {
-      if (rect.top >= 0 || index + 1 >= sections.length) return false;
-      const nextRect = sections[index + 1].getBoundingClientRect();
-      return (
-        (isSectionInView(nextRect) && !isSectionNearTop(nextRect)) ||
-        nextRect.top > viewportHeight
-      );
-    }
+    // function isSectionOverflown(rect: DOMRect, index: number) {
+    //   if (rect.top >= 0 || index + 1 >= sections.length) return false;
+    //   const nextRect = sections[index + 1].getBoundingClientRect();
+    //   return (
+    //     nextRect.top > viewportHeight ||
+    //     (isSectionInView(nextRect) && !isSectionNearTop(nextRect))
+    //   );
+    // }
   }
 
   function highlightSectionOnAnchorClick() {
@@ -154,6 +182,20 @@ export function ScrollSpy(option: ScrollSpyOptions) {
     }
 
     return { anchors, sections };
+  }
+
+  function getSectionHeights(titleElements: HTMLElement[]) {
+    const sectionHeights: { begin: number; end: number }[] = [];
+
+    for (const el of titleElements) {
+      const section = getSectionEl(el);
+      const top = section.offsetTop;
+      const height = section.offsetHeight;
+
+      sectionHeights.push({ begin: top, end: top + height });
+    }
+
+    return sectionHeights;
   }
 
   function highlight(selector?: string | HTMLElement) {

@@ -114,7 +114,11 @@ const article: Section[] = [
     import { ScrollSpy } from "./scroll-spy";
     (() => {
         const toc = document.querySelector<HTMLElement>("[data-role=toc]")!;
-        const scrollSpy = ScrollSpy({ nav: toc, activeClass: "text-primary" });
+        const scrollSpy = ScrollSpy({
+            nav: toc,
+            activeClass: "text-primary",
+            getSectionEl: (title) => title.parentElement as HTMLDivElement,
+        });
         scrollSpy.listen();
     })();
 </script>
