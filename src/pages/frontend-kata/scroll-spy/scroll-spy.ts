@@ -22,17 +22,54 @@ export function ScrollSpy(option: ScrollSpyOptions) {
   const topThreshold = option.topThreshold ?? 300;
   const getSectionEl = option.getSectionEl ?? ((el) => el);
 
-  const nav =
+  const navEl =
     typeof option.nav === "string"
       ? document.querySelector<HTMLElement>(option.nav)
       : option.nav;
-  const { anchors, sections } = readPageAnchors();
-  const sectionHeights = getSectionHeights(sections);
+  const { navs, anchors } = readPageAnchors();
+  const anchorHeights = getSectionHeights(anchors);
+  const sections = getSections(anchors);
 
   function listen() {
     highlightSectionOnAnchorClick();
-    window.addEventListener("scroll", debounce(handlePageScroll, 100));
-    handlePageScroll();
+    // window.addEventListener("scroll", debounce(handlePageScroll, 100));
+    // handlePageScroll();
+
+    const navSectionRelation = new Map<HTMLElement, HTMLElement>();
+    const topThresholdRatio =
+      100 -
+      Math.round((topThreshold / document.documentElement.clientHeight) * 100);
+    const observer = new IntersectionObserver(
+      handleOnSectionIntersectionChange(navSectionRelation),
+      {
+        rootMargin: `0px 0px -${topThresholdRatio}% 0px`,
+      },
+    );
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      navSectionRelation.set(section, navs[i]);
+      observer.observe(section);
+    }
+  }
+
+  function handleOnSectionIntersectionChange(
+    cachedEntries: Map<HTMLElement, HTMLElement>,
+  ) {
+    const intersectionSections = new Map<HTMLElement, HTMLElement>();
+
+    function handler(entries: IntersectionObserverEntry[]): void {
+      for (const entry of entries) {
+        const section = entry.target as HTMLElement;
+        if (entry.isIntersecting) {
+          const nav = cachedEntries.get(section);
+          nav && intersectionSections.set(section, nav);
+        } else {
+          intersectionSections.delete(section);
+        }
+      }
+      highlight(intersectionSections.values().next()?.value);
+    }
+    return handler;
   }
 
   function handlePageScroll() {
@@ -45,15 +82,15 @@ export function ScrollSpy(option: ScrollSpyOptions) {
     // - if section height is dynamic, the active section may not be accurate
     // - the layout of html elements are restrict to find the actual section height
     let lo = 0;
-    let hi = sectionHeights.length;
+    let hi = anchorHeights.length;
 
     const yOffset = document.documentElement.scrollTop;
     while (lo < hi) {
       const mid = lo + Math.floor((hi - lo) / 2);
-      const { begin, end } = sectionHeights[mid];
+      const { begin, end } = anchorHeights[mid];
 
       if (begin === yOffset + topThreshold) {
-        highlight(anchors[mid]);
+        highlight(navs[mid]);
         return;
       } else if (begin > yOffset + topThreshold) {
         hi = mid;
@@ -62,7 +99,7 @@ export function ScrollSpy(option: ScrollSpyOptions) {
       }
     }
 
-    highlight(anchors[lo - 1]);
+    highlight(navs[lo - 1]);
 
     // approach II: find the active section by calculating the rect of boundary sections with offset
     // binary search can be used to optimize the search if the anchors are sorted which is the common case
@@ -155,33 +192,45 @@ export function ScrollSpy(option: ScrollSpyOptions) {
   }
 
   function highlightSectionOnAnchorClick() {
-    for (const anchor of anchors) {
-      anchor.addEventListener("click", (e) => {
+    for (const nav of navs) {
+      nav.addEventListener("click", (e) => {
         e.target && highlight(e.target as HTMLAnchorElement);
       });
     }
   }
 
-  function readPageAnchors() {
-    if (!nav) return { anchors: [], sections: [] };
-    const sections: HTMLElement[] = [];
-    const anchors: HTMLAnchorElement[] = [];
+  function readPageAnchors(): {
+    navs: HTMLAnchorElement[];
+    anchors: HTMLElement[];
+  } {
+    if (!navEl) return { navs: [], anchors: [] };
+    const navs: HTMLAnchorElement[] = [];
+    const anchors: HTMLElement[] = [];
 
-    for (const anchor of nav.querySelectorAll<HTMLAnchorElement>(
+    for (const nav of navEl.querySelectorAll<HTMLAnchorElement>(
       "a[href^='#']",
     )) {
-      anchors.push(anchor);
-      const href = anchor.getAttribute("href");
+      navs.push(nav);
+      const href = nav.getAttribute("href");
       if (!href) continue;
       const targetId =
         href[0] === "#" ? href.slice(1) : new URL(href).hash.slice(1);
       const section = document.getElementById(targetId);
       if (section) {
-        sections.push(section);
+        anchors.push(section);
       }
     }
 
-    return { anchors, sections };
+    return { navs, anchors };
+  }
+
+  function getSections(anchorElements: HTMLElement[]) {
+    const sections: HTMLElement[] = [];
+    for (const anchor of anchorElements) {
+      const section = getSectionEl(anchor);
+      sections.push(section);
+    }
+    return sections;
   }
 
   function getSectionHeights(titleElements: HTMLElement[]) {
@@ -199,9 +248,9 @@ export function ScrollSpy(option: ScrollSpyOptions) {
   }
 
   function highlight(selector?: string | HTMLElement) {
-    if (!nav) return;
+    if (!navEl) return;
 
-    const active = nav.querySelector("[data-state='active']");
+    const active = navEl.querySelector("[data-state='active']");
     if (active) {
       active.removeAttribute("data-state");
       active.classList.remove(...activeClass);
