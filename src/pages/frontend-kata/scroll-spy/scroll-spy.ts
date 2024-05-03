@@ -81,25 +81,25 @@ export function ScrollSpy(option: ScrollSpyOptions) {
     // CONS:
     // - if section height is dynamic, the active section may not be accurate
     // - the layout of html elements are restrict to find the actual section height
-    let lo = 0;
-    let hi = anchorHeights.length;
-
-    const yOffset = document.documentElement.scrollTop;
-    while (lo < hi) {
-      const mid = lo + Math.floor((hi - lo) / 2);
-      const { begin, end } = anchorHeights[mid];
-
-      if (begin === yOffset + topThreshold) {
-        highlight(navs[mid]);
-        return;
-      } else if (begin > yOffset + topThreshold) {
-        hi = mid;
-      } else {
-        lo = mid + 1;
-      }
-    }
-
-    highlight(navs[lo - 1]);
+    // let lo = 0;
+    // let hi = anchorHeights.length;
+    //
+    // const yOffset = document.documentElement.scrollTop;
+    // while (lo < hi) {
+    //   const mid = lo + Math.floor((hi - lo) / 2);
+    //   const { begin, end } = anchorHeights[mid];
+    //
+    //   if (begin === yOffset + topThreshold) {
+    //     highlight(navs[mid]);
+    //     return;
+    //   } else if (begin > yOffset + topThreshold) {
+    //     hi = mid;
+    //   } else {
+    //     lo = mid + 1;
+    //   }
+    // }
+    //
+    // highlight(navs[lo - 1]);
 
     // approach II: find the active section by calculating the rect of boundary sections with offset
     // binary search can be used to optimize the search if the anchors are sorted which is the common case
@@ -131,25 +131,25 @@ export function ScrollSpy(option: ScrollSpyOptions) {
     //
     // highlight(anchors[lo]);
 
-    // let activeSection = -1;
-    // for (let i = 0; i < sections.length; i++) {
-    //   const section = sections[i];
-    //   const rect = section.getBoundingClientRect();
-    //
-    //   if (
-    //     isSectionNearTop(rect) ||
-    //     isSectionOverflown(rect, sections.indexOf(section))
-    //   ) {
-    //     activeSection = i;
-    //     break;
-    //   }
-    // }
-    //
-    // highlight(anchors[activeSection]);
+    let activeSection = -1;
+    for (let i = 0; i < sections.length; i++) {
+      const section = sections[i];
+      const rect = section.getBoundingClientRect();
 
-    // function isSectionInView(rect: DOMRect) {
-    //   return rect.top >= 0 && rect.top <= viewportHeight;
-    // }
+      if (
+        isSectionNearTop(rect) ||
+        isSectionOverflown(rect, sections.indexOf(section))
+      ) {
+        activeSection = i;
+        break;
+      }
+    }
+
+    highlight(navs[activeSection]);
+
+    function isSectionInView(rect: DOMRect) {
+      return rect.top >= 0 && rect.top <= viewportHeight;
+    }
 
     /**
      *  +-------------+ <- viewport top
@@ -162,9 +162,9 @@ export function ScrollSpy(option: ScrollSpyOptions) {
      *  |             |
      *  +-------------+ <- viewport bottom
      */
-    // function isSectionNearTop(rect: DOMRect) {
-    //   return isSectionInView(rect) && rect.top <= topThreshold;
-    // }
+    function isSectionNearTop(rect: DOMRect) {
+      return isSectionInView(rect) && rect.top <= topThreshold;
+    }
 
     /**
      *    +---------+  <- section I top             +---------+  <- section I top
@@ -181,14 +181,14 @@ export function ScrollSpy(option: ScrollSpyOptions) {
      *    +---------+  <- section II top
      *    |#########|
      */
-    // function isSectionOverflown(rect: DOMRect, index: number) {
-    //   if (rect.top >= 0 || index + 1 >= sections.length) return false;
-    //   const nextRect = sections[index + 1].getBoundingClientRect();
-    //   return (
-    //     nextRect.top > viewportHeight ||
-    //     (isSectionInView(nextRect) && !isSectionNearTop(nextRect))
-    //   );
-    // }
+    function isSectionOverflown(rect: DOMRect, index: number) {
+      if (rect.top >= 0 || index + 1 >= sections.length) return false;
+      const nextRect = sections[index + 1].getBoundingClientRect();
+      return (
+        nextRect.top > viewportHeight ||
+        (isSectionInView(nextRect) && !isSectionNearTop(nextRect))
+      );
+    }
   }
 
   function highlightSectionOnAnchorClick() {
