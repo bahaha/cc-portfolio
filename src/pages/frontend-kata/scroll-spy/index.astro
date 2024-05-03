@@ -1,0 +1,208 @@
+---
+import Layout from "@/layouts/DefaultLayout.astro";
+import Section from "@/kata/scroll-spy/astro/section.astro";
+import Skeleton from "@/kata/scroll-spy/astro/skeleton.astro";
+
+type Section = {
+    label: string;
+    title: string;
+    height: number;
+    heading?: "h1" | "h2" | "h3" | "h4" | "h5";
+};
+
+const article: Section[] = [
+    {
+        label: "what_requests_use_cors",
+        title: "What requests use CORS?",
+        height: 376,
+    },
+    { label: "functional_overview", title: "Functional overview", height: 400 },
+    {
+        label: "examples_of_access_control_scenarios",
+        title: "Examples of access control scenarios",
+        height: 56,
+    },
+    {
+        label: "simple_requests",
+        title: "Simple requests",
+        height: 3885,
+        heading: "h3",
+    },
+    {
+        label: "preflighted_requests",
+        title: "Preflighted Requests",
+        height: 5469,
+        heading: "h3",
+    },
+    {
+        label: "requests_with_credentials",
+        title: "Requests with credentials",
+        height: 3850,
+        heading: "h3",
+    },
+    {
+        label: "the_http_response_headers",
+        title: "The HTTP response headers",
+        height: 140,
+        heading: "h3",
+    },
+    {
+        label: "access-control-allow-origin",
+        title: "Access-Control-Allow-Origin",
+        height: 680,
+        heading: "h3",
+    },
+    {
+        label: "access-control-expose-headers",
+        title: "Access-Control-Expose-Headers",
+        height: 484,
+        heading: "h3",
+    },
+    {
+        label: "access-control-max-age",
+        title: "Access-Control-Max-Age",
+        height: 281,
+        heading: "h3",
+    },
+    {
+        label: "access-control-allow-credentials",
+        title: "Access-Control-Allow-Credentials",
+        height: 393,
+        heading: "h3",
+    },
+    {
+        label: "access-control-allow-methods",
+        title: "Access-Control-Allow-Methods",
+        height: 337,
+        heading: "h3",
+    },
+    {
+        label: "access-control-allow-headers",
+        title: "Access-Control-Allow-Headers",
+        height: 249,
+        heading: "h3",
+    },
+    {
+        label: "the_http_request_headers",
+        title: "The HTTP request headers",
+        height: 147,
+    },
+    { label: "origin", title: "Origin", height: 433, heading: "h3" },
+    {
+        label: "access-control-request-method",
+        title: "Access-Control-Request-Method",
+        height: 281,
+        heading: "h3",
+    },
+    {
+        label: "access-control-request-headers",
+        title: "Access-Control-Request-Headers",
+        height: 337,
+        heading: "h3",
+    },
+    { label: "specifications", title: "Specifications", height: 115 },
+    {
+        label: "browser_compatibility",
+        title: "Browser Compatibility",
+        height: 382,
+    },
+    { label: "see_also", title: "See Also", height: 388 },
+];
+---
+
+<script>
+    import { ScrollSpy } from "./scroll-spy";
+    (() => {
+        const toc = document.querySelector<HTMLElement>("[data-role=toc]")!;
+        const scrollSpy = ScrollSpy({
+            nav: toc,
+            activeClass: "text-primary",
+            getSectionEl: (title) => title.parentElement as HTMLDivElement,
+        });
+        scrollSpy.listen();
+    })();
+</script>
+<Layout title="Scroll Spy 👀">
+    <section class="container flex h-screen gap-8 py-8">
+        <main class="flex h-fit gap-8">
+            <article>
+                <header>
+                    <h1>Cross-Origin Resource Sharing (CORS)</h1>
+                </header>
+                <Skeleton height={1090} />
+                {
+                    article.map(({ label, title, height, heading }) => (
+                        <Section label={label} title={title} heading={heading}>
+                            <Skeleton height={height} />
+                        </Section>
+                    ))
+                }
+            </article>
+
+            <aside data-role="toc" class="sticky top-8 w-fit self-start">
+                <nav>
+                    <header>
+                        <h2>In this article</h2>
+                    </header>
+                    <ul class="mt-6 !list-none border-l-2 pl-6">
+                        <li>
+                            <a href="#what_requests_use_cors">
+                                What requests use CORS?
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#functional_overview"
+                                >Functional Overview</a
+                            >
+                        </li>
+                        <li>
+                            <a href="#examples_of_access_control_scenarios">
+                                Examples of access control scenarios
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#the_http_response_headers"
+                                >The HTTP response headers
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#the_http_request_headers">
+                                The HTTP request headers
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#specifications">Sepcifications</a>
+                        </li>
+                        <li>
+                            <a href="#browser_compatibility">
+                                Browser Compatibility
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#see_also">See Also</a>
+                        </li>
+                    </ul>
+                </nav>
+            </aside>
+        </main>
+    </section>
+
+    <style>
+        h1 {
+            @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+        }
+        h2 {
+            @apply mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors [&:first-child]:mt-0;
+        }
+        p {
+            @apply leading-7 [&:not(:first-child)]:mt-6;
+        }
+        ul {
+            @apply my-6 ml-6 list-disc [&>li]:mt-2;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+</Layout>

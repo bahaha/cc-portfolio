@@ -1,0 +1,30 @@
+---
+type Props = {
+    label: string;
+    title: string;
+    heading?: "h1" | "h2" | "h3" | "h4" | "h5";
+};
+
+const { label, title, heading } = Astro.props;
+const Heading = heading ?? "h2";
+---
+
+<section aria-labelledby={label}>
+    <Heading id={label}>
+        <a
+            href={`#${label}`}
+            class="before:invisible before:-ml-7 before:mr-2 before:leading-none before:text-secondary before:content-['#'] hover:underline hover:before:visible hover:before:no-underline"
+            >{title}</a
+        >
+    </Heading>
+    <slot />
+</section>
+
+<style>
+    h2 {
+        @apply mt-10 scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight transition-colors [&:first-child]:mt-0;
+    }
+    h3 {
+        @apply scroll-m-20 text-2xl font-semibold tracking-tight;
+    }
+</style>
