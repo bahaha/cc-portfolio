@@ -1,0 +1,85 @@
+---
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+const size = 200;
+const shapes = [
+    { ratio: 4 / 3, height: 200 },
+    { ratio: 16 / 9, height: 350 },
+    { ratio: 1, height: 180 },
+    { ratio: 9 / 16, height: 550 },
+    { ratio: 16 / 10, height: 400 },
+];
+
+type Image = {
+    id: number;
+    width: number;
+    height: number;
+    ratio: number;
+};
+
+function randomIds(len: number): Image[] {
+    const ids = new Set<Image>();
+    while (ids.size < len) {
+        const shape = shapes[Math.floor(Math.random() * shapes.length)];
+        ids.add({
+            id: Math.floor(Math.random() * 1000),
+            ...shape,
+            width: Math.round(shape.height * shape.ratio),
+        });
+    }
+    return Array.from(ids);
+}
+const images = randomIds(size);
+---
+
+<DefaultLayout>
+    <main class="container">
+        <h1 class="my-4">Image Gallery</h1>
+        <div class="columns-1 gap-4 sm:columns-3" data-role="gallery">
+            {
+                images.map(({ id, width, height, ratio }) => (
+                    <div style={{ width, height }}>
+                        <img
+                            src="/600x600.png"
+                            data-src={`https://picsum.photos/id/${id}/${width}/${height}.webp`}
+                            alt={`Random image ${id}`}
+                            class="my-4 h-full w-full transform rounded-lg object-cover shadow-lg transition-transform duration-300 hover:scale-105 [&:first-child]:mt-0"
+                            style={{ aspectRatio: ratio }}
+                        />
+                    </div>
+                ))
+            }
+        </div>
+    </main>
+</DefaultLayout>
+<script>
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    const img = entry.target as HTMLImageElement;
+                    img.src = img.dataset.src!;
+                    observer.unobserve(img);
+                }
+            });
+        },
+        {
+            rootMargin: `0px 0px 200px 0px`,
+        },
+    );
+    document
+        .querySelectorAll<HTMLImageElement>("[data-role=gallery] img")
+        .forEach((img) => {
+            const src = img.dataset.src;
+            if (!src) return;
+            observer.observe(img);
+        });
+</script>
+
+<style>
+    h1 {
+        @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+    }
+    img {
+        @apply bg-secondary;
+    }
+</style>
