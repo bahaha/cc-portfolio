@@ -1,0 +1,40 @@
+---
+import DefaultLayout from "@/layouts/DefaultLayout.astro";
+---
+
+<DefaultLayout>
+    <main class="container">
+        <h1>Challenges</h1>
+        <ul class="m-4 flex flex-wrap gap-8">
+            <li>
+                <a
+                    href="/frontend-kata/intersection-observer/lazy-loaded-image-on-view"
+                >
+                    Lazy loaded image on view
+                </a>
+            </li>
+            <li>
+                <a href="/frontend-kata/intersection-observer/load-more">
+                    Load more on infinite scroll
+                </a>
+            </li>
+            <li>
+                <a
+                    href="/frontend-kata/intersection-observer/pause-resume-video"
+                >
+                    Automatically pause/resume video
+                </a>
+            </li>
+        </ul>
+    </main>
+</DefaultLayout>
+
+<style>
+    h1 {
+        @apply scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl;
+    }
+
+    a {
+        @apply underline hover:text-primary;
+    }
+</style>
